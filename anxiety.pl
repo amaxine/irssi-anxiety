@@ -30,8 +30,8 @@ sub runsub {
 Irssi::signal_add({
 	'message own_public'  => 'countUp',
 	'message own_private' => 'countUp',
-	'message public'      => 'countDown',
-	'message private'     => 'countDown',
+	'message public'      => 'countDownPublic',
+	'message private'     => 'countDownPrivate',
 	'window changed'      => sub { Irssi::statusbar_items_redraw 'anxietyCounter'; }
 });
 
@@ -43,8 +43,14 @@ sub countUp {
 	Irssi::statusbar_items_redraw 'anxietyCounter';
 };
 
-sub countDown {
+sub countDownPrivate {
 	my $window =  $_[2];
+	$anxiety{$window} = -1 unless defined($anxiety{$window}--);
+	Irssi::statusbar_items_redraw 'anxietyCounter';
+};
+
+sub countDownPublic {
+	my $window = $_[4];
 	$anxiety{$window} = -1 unless defined($anxiety{$window}--);
 	Irssi::statusbar_items_redraw 'anxietyCounter';
 };
@@ -56,7 +62,7 @@ sub countReset {
 };
 
 sub countGet {
-	my $window = $anxiety{$_[0]} // 0;
+	my $window = length $_[0] ? $anxiety{$_[0]} // 0 : $anxiety{(Irssi::active_win->get_active_name)} // 0;
 	print "Counter: $window";
 };
 
